@@ -127,7 +127,7 @@ def execute(self, match_num, ctx):
 
 
 	elif match_num == 4:  # 报刀
-		match = re.match(r'^报刀 ?(?:[\-\=]([1-5]))? ?(\d+)?([Ww万Kk千])? *(?:\[CQ:at,qq=(\d+)\])? *(昨[日天])?$', cmd)
+		match = re.match(r'^报刀 ?(?:[\-\=]([1-5]))? ?(\d+)?([Ww万Kk千])? *(补偿|补|b|bc)? *(?:\[CQ:at,qq=(\d+)\])? *(昨[日天])?$', cmd)
 		if not match: return '报刀格式:\n报刀 100w（需先申请出刀）\n报刀 -1 100w（-1表示报在1王）'
 		unit = {
 			'W': 10000,
@@ -139,10 +139,11 @@ def execute(self, match_num, ctx):
 		}.get(match.group(3), 1)
 		boss_num = match.group(1)
 		damage = int(match.group(2) or 0) * unit
-		behalf = match.group(4) and int(match.group(4))
-		previous_day = bool(match.group(5))
+		is_continue = match.group(4) and True or False
+		behalf = match.group(5) and int(match.group(5))
+		previous_day = bool(match.group(6))
 		try:
-			boss_status = self.challenge(group_id, user_id, False, damage, behalf,
+			boss_status = self.challenge(group_id, user_id, False, damage, behalf, is_continue,
 				boss_num = boss_num, previous_day = previous_day)
 			# if behalf:
 			# 	sender = self._get_nickname_by_qqid(user_id)
@@ -155,14 +156,15 @@ def execute(self, match_num, ctx):
 
 
 	elif match_num == 5:  # 尾刀
-		match = re.match(r'^尾刀 ?([1-5])? ?(?:\[CQ:at,qq=(\d+)\])? *(昨[日天])?$', cmd)
+		match = re.match(r'^尾刀 ?([1-5])? *(补偿|补|b|bc)? ?(?:\[CQ:at,qq=(\d+)\])? *(昨[日天])?$', cmd)
 		if not match: return
-		behalf = match.group(2) and int(match.group(2))
+		behalf = match.group(3) and int(match.group(3))
+		is_continue = match.group(2) and True or False
 		boss_num = match.group(1)
 
-		previous_day = bool(match.group(3))
+		previous_day = bool(match.group(4))
 		try:
-			boss_status = self.challenge(group_id, user_id, True, None, behalf,
+			boss_status = self.challenge(group_id, user_id, True, None, behalf, is_continue,
 				boss_num = boss_num, previous_day = previous_day)
 			# if behalf:
 			# 	sender = self._get_nickname_by_qqid(user_id)

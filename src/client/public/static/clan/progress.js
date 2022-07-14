@@ -16,7 +16,8 @@ var vm = new Vue({
         send_via_private: false,
         dropMemberVisible: false,
         today: 0,
-        isMobile: false
+        isMobile: false,
+        tempList:[0,1,2,3,4,5],
     },
     mounted() {
         var thisvue = this;
@@ -87,7 +88,6 @@ var vm = new Vue({
                 return '';
             }
             if (cha.behalf) {
-                console.log(this.members)
                 return `<a class="digit${cha.behalf.toString().length}">${this.find_name(cha.behalf)} 代刀</a>`;
             }
         },
@@ -99,7 +99,8 @@ var vm = new Vue({
             nd.setTime(cha.challenge_time * 1000);
             var detailstr = nd.toLocaleString('chinese', { hour12: false, timeZone: 'asia/shanghai' }) + '\n';
             detailstr += cha.cycle + '周目' + cha.boss_num + '号boss\n';
-            detailstr += (cha.health_ramain + cha.damage).toLocaleString(options = { timeZone: 'asia/shanghai' }) + '→' + cha.health_ramain.toLocaleString(options = { timeZone: 'asia/shanghai' });
+            detailstr += (cha.health_remain + cha.damage).toLocaleString(options = { timeZone: 'asia/shanghai' }) 
+                        + '→' + cha.health_remain.toLocaleString(options = { timeZone: 'asia/shanghai' });
             if (cha.message) {
                 detailstr += '\n留言：' + cha.message;
             }
@@ -109,12 +110,12 @@ var vm = new Vue({
             if (columnIndex >= 4) {
                 if (columnIndex % 2 == 0) {
                     var detail = row.detail[columnIndex - 4];
-                    if (detail != undefined && detail.health_ramain != 0) {
+                    if (detail != undefined && detail.health_remain != 0) {
                         return [1, 2];
                     }
                 } else {
                     var detail = row.detail[columnIndex - 5];
-                    if (detail != undefined && detail.health_ramain != 0) {
+                    if (detail != undefined && detail.health_remain != 0) {
                         return [0, 0];
                     }
                 }
@@ -140,7 +141,6 @@ var vm = new Vue({
         refresh: function (challenges) {
             challenges.sort((a, b) => a.qqid - b.qqid);
             this.progressData = [...this.members];
-            // for (m of this.progressData) m.today_total_damage = 0;
             var thisvue = this;
             var m = { qqid: -1 };
             for (c of challenges) {
@@ -150,15 +150,25 @@ var vm = new Vue({
                         qqid: c.qqid,
                         finished: 0,
                         detail: [],
-                        // today_total_damage: 0,
                     }
                 }
-                m.detail[2 * m.finished] = c;
-                // m.today_total_damage += c.damage;
+
+                for (id of this.tempList){
+                    if (!m.detail[id]) {
+                        if (id%2 == 1 && c.is_continue && m.detail[id-1] && m.detail[id-1].health_remain == 0) {
+                            m.detail[id] = c;
+                            break;
+                        } else if (id%2 == 0) {
+                            m.detail[id] = c;
+                            break;
+                        }
+                    }
+                }
+
                 if (c.is_continue) {
                     m.finished += 0.5;
                 } else {
-                    if (c.health_ramain != 0) {
+                    if (c.health_remain != 0) {
                         m.finished += 1;
                     } else {
                         m.finished += 0.5;
@@ -170,15 +180,17 @@ var vm = new Vue({
         viewTails: function () {
             this.tailsData = [];
             for (const m of this.progressData) {
-                if (m.finished % 1 != 0) {
-                    let c = m.detail[m.finished * 2 - 1];
-                    this.tailsData.push({
-                        qqid: m.qqid,
-                        nickname: m.nickname,
-                        boss: c.cycle + '-' + c.boss_num,
-                        damage: c.damage,
-                        message: c.message,
-                    });
+                for (id of this.tempList) {
+                    if (id%2 == 0 && m.detail[id] && m.detail[id].health_remain == 0 && !m.detail[id].is_continue && !m.detail[id+1]) {
+                        let c = m.detail[id];
+                        this.tailsData.push({
+                            qqid: m.qqid,
+                            nickname: m.nickname,
+                            boss: c.cycle + '-' + c.boss_num,
+                            damage: c.damage,
+                            message: c.message,
+                        });
+                    }
                 }
             }
             this.tailsDataVisible = true;

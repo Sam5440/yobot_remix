@@ -261,18 +261,18 @@ def modify(self, group_id: Groupid, cycle=None, bossData=None):
 	group:Clan_group = Clan_group.get_or_none(group_id=group_id)
 	if group is None: raise GroupNotExist
 
-	set_cycle_level = self._level_by_cycle(cycle and cycle or group.boss_cycle, group.game_server)
+	next_cycle_level = self._level_by_cycle(cycle and cycle+1 or group.boss_cycle+1, group.game_server)
 	now_health = safe_load_json(group.now_cycle_boss_health, {})
 	next_health = safe_load_json(group.next_cycle_boss_health, {})
 
 	for boss_num, data in bossData.items():
-		full_boss_health = self.setting['boss'][group.game_server][set_cycle_level][int(boss_num)-1]
+		next_cycle_full_boss_health = self.setting['boss'][group.game_server][next_cycle_level][int(boss_num)-1]
 		if data["is_next"]:
 			now_health[boss_num] = 0
 			next_health[boss_num] = data["health"]
 		else:
 			now_health[boss_num] = data["health"]
-			next_health[boss_num] = full_boss_health
+			next_health[boss_num] = next_cycle_full_boss_health
 	
 	group.now_cycle_boss_health = json.dumps(now_health)
 	group.next_cycle_boss_health = json.dumps(next_health)
@@ -335,6 +335,7 @@ def clear_data_slot(self, group_id: Groupid, battle_id: Optional[int] = None):
 	group:Clan_group = Clan_group.get_or_none(group_id=group_id)
 	if group is None:
 		raise GroupNotExist
+
 	now_cycle_boss_health = {}
 	level = self._level_by_cycle(1, group.game_server)
 	for boss_num, health in enumerate(self.bossinfo[group.game_server][level]):
@@ -343,11 +344,12 @@ def clear_data_slot(self, group_id: Groupid, battle_id: Optional[int] = None):
 	level = self._level_by_cycle(2, group.game_server)
 	for boss_num, health in enumerate(self.bossinfo[group.game_server][level]):
 		next_cycle_boss_health[boss_num+1] = health
-	
-	group.now_cycle_boss_health = now_cycle_boss_health
-	group.next_cycle_boss_health = next_cycle_boss_health
+
+	group.now_cycle_boss_health = json.dumps(now_cycle_boss_health)
+	group.next_cycle_boss_health = json.dumps(next_cycle_boss_health)
 	group.boss_cycle = 1
 	group.challenging_member_list = None
+	group.subscribe_list = None
 	group.challenging_start_time = 0
 
 	group.save()
@@ -489,6 +491,7 @@ def challenge(self,
 				defeat: bool,
 				damage = 0,
 				behalfed:QQid = None,
+				is_continue = False,
 				*,
 				boss_num = None,
 				previous_day = False,
@@ -511,6 +514,7 @@ def challenge(self,
 
 	behalf = None
 	if behalfed is not None:
+		behalfed = int(behalfed)
 		behalf = qqid
 		qqid = behalfed
 	if qqid == behalf: behalf = None
@@ -526,9 +530,9 @@ def challenge(self,
 		raise GroupError('又不申请出刀又不说打哪个王，报啥子刀啊 (╯‵□′)╯︵┻━┻')
 	if not self.check_blade(group_id, qqid):
 		if behalf:
-			self.apply_for_challenge(False, group_id, behalf, boss_num, qqid, False)
+			self.apply_for_challenge(is_continue, group_id, behalf, boss_num, qqid, False)
 		else:
-			self.apply_for_challenge(False, group_id, qqid, boss_num, behalf, False)
+			self.apply_for_challenge(is_continue, group_id, qqid, boss_num, behalf, False)
 
 	group:Clan_group = Clan_group.get_or_none(group_id=group_id)
 	if group is None: raise GroupNotExist
@@ -539,7 +543,7 @@ def challenge(self,
 	now_cycle_boss_health = safe_load_json(group.now_cycle_boss_health, {})
 	next_cycle_boss_health = safe_load_json(group.next_cycle_boss_health, {})
 	real_cycle_boss_health = now_cycle_boss_health
-	is_continue = challenging_member_list[boss_num][str(qqid)]['is_continue']
+	is_continue = is_continue or challenging_member_list[boss_num][str(qqid)]['is_continue']
 	if now_cycle_boss_health[boss_num] == 0 and next_cycle_boss_health[boss_num] != 0:
 		boss_cycle += 1
 		real_cycle_boss_health = next_cycle_boss_health
@@ -574,6 +578,12 @@ def challenge(self,
 	if finished >= 3:
 		if previous_day: raise InputError('昨日上报次数已达到3次')
 		raise InputError('今日上报次数已达到3次')
+	#出了多少刀补偿
+	all_cont_blade = sum(bool(c.is_continue) for c in challenges)
+	#剩余多少刀补偿
+	cont_blade = len(challenges) - finished - all_cont_blade
+	if is_continue and cont_blade == 0:
+		raise GroupError('您没有补偿刀')
 
 	if defeat:
 		boss_health_remain = 0
@@ -604,11 +614,11 @@ def challenge(self,
 			if _health == 0: all_clear += 1
 		if all_clear == 5:			# 检查当前周目的boss是否已经全部击杀
 			group.boss_cycle += 1	# 进入下一周目
-			level = self._level_by_cycle(group.boss_cycle, group.game_server)
+			next_cycle_level = self._level_by_cycle(group.boss_cycle+1, group.game_server)
 			for _boss_num, _health in next_cycle_boss_health.items():# 血量数据挪移
 				now_cycle_boss_health[_boss_num] = _health
 				if _health == 0: subscribe_remind(self, group_id, _boss_num)# 如果挪过来的血量为0，则发送预约提醒
-			for boss_num_, health_ in enumerate(self.bossinfo[group.game_server][level]):# 获取新血量数据放到下周目
+			for boss_num_, health_ in enumerate(self.bossinfo[group.game_server][next_cycle_level]):# 获取新血量数据放到下周目
 				next_cycle_boss_health[str(boss_num_+1)] = health_
 		else: real_cycle_boss_health[boss_num] = 0
 
@@ -1239,7 +1249,7 @@ def get_report(self,
 			'challenge_pcrtime': c.challenge_pcrtime,
 			'cycle': c.boss_cycle,
 			'boss_num': c.boss_num,
-			'health_ramain': c.boss_health_remain,
+			'health_remain': c.boss_health_remain,
 			'damage': c.challenge_damage,
 			'is_continue': c.is_continue,
 			'message': c.message,

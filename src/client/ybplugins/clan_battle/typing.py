@@ -14,7 +14,7 @@ class BossChallenge:
     time: Pcr_time
     cycle: int
     num: int
-    health_ramain: int
+    health_remain: int
     damage: int
     is_continue: bool
     team: Optional[List[int]]
