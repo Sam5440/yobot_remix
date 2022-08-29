@@ -5,3 +5,6 @@ src/client/yobot_data/log/公会战日志.log
 src/client/yobot_data/yobotdata_new.db
 .vscode/settings.json
 src/client/yobot_data/yobot_config.json
+src/client/public/template/help/
+src/client/public/static/aya.ico
+src/client/yobot_data/

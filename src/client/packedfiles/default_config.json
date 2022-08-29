@@ -23,6 +23,7 @@
     "show_icp": false,
     "icp_info": "",
     "gongan_info": "",
+    "web_gzip": 0,
 
     "boss":{
         "jp": [

@@ -311,7 +311,7 @@ var vm = new Vue({
         },
         boss_icon_src: function(boss_num) {
             var icon_id = this.bossData[boss_num].icon_id
-            return "https://we-aatrox.top/yocool/boss_icon/"+icon_id+".webp"
+            return "/yobot-depencency/yocool@final/princessadventure/boss_icon/"+icon_id+".webp"
         },
         setting: function(){
             this.$router.push({path:'./setting/'})

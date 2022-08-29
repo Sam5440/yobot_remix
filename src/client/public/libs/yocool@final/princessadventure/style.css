@@ -23,6 +23,10 @@ body {
 	font-family: Arial, Tahoma, sans-serif;
 	text-align: center;
 	margin: 0px;
+	/* background: url("https://www.keaidian.com/uploads/allimg/190424/24110307_8.jpg") no-repeat center center fixed;
+	-webkit-background-size: cover;
+	-o-background-size: cover;                
+	background-size: cover; */
 }
 
 h1 {
@@ -99,7 +103,7 @@ el-button {
 }
 
 .clanname {
-	background: url("https://we-aatrox.top/yocool/image/banner.png") no-repeat center center;
+	background: url("/yobot-depencency/yocool@final/princessadventure/banner.png") no-repeat center center;
 	text-align: center;
 	width: 320px;
 	height: 60px;
@@ -127,7 +131,7 @@ el-button {
 }
 
 .clanbg {
-	background: url("https://we-aatrox.top/yocool/image/clanbg.png") no-repeat center;
+	background: url("/yobot-depencency/yocool@final/princessadventure/clanbg.png") no-repeat center;
 	text-align: center;
 	width: 100%;
 	height: 300px;
@@ -137,7 +141,7 @@ el-button {
 }
 
 .boss_info-all {
-	background: url("https://we-aatrox.top/yocool/image/clanbg.png") no-repeat center;
+	background: url("/yobot-depencency/yocool@final/princessadventure/clanbg.png") no-repeat center;
 	position: relative;
 	width: 100%;
 	height: auto;
@@ -219,7 +223,7 @@ el-button {
 	width: 150px;
 	height: 150px;
 	/* overflow: hidden; */
-	background: url("https://we-aatrox.top/yocool/boss_icon/300100.webp");
+	background: url("/yobot-depencency/yocool@final/princessadventure/boss_icon/300100.webp");
 	background-size: 100%;
 	/* margin: 50%; */
 	/* transform:scale(0.8); */
@@ -263,7 +267,7 @@ el-button {
 	.logo {
 		width: 135px;
 		height: 45px;
-		background: url("https://we-aatrox.top/yocool/image/logo.png") no-repeat center;
+		background: url("/yobot-depencency/yocool@final/princessadventure/logo.png") no-repeat center;
 		background-size: 100%;
 		position: fixed;
 		z-index: 100;

@@ -1,4 +1,5 @@
 # coding=utf-8
+import gzip
 import json
 import mimetypes
 import os
@@ -6,6 +7,7 @@ import random
 import shutil
 import socket
 import sys
+from io import BytesIO
 from functools import reduce
 from typing import Any, Callable, Dict, Iterable, List, Tuple
 from urllib.parse import urljoin
@@ -14,7 +16,7 @@ import requests
 from aiocqhttp.api import Api
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from opencc import OpenCC
-from quart import Quart, send_file
+from quart import Quart, make_response, request, send_file
 
 if __package__:
     from .ybplugins import (clan_battle, homepage,
@@ -112,6 +114,31 @@ class Yobot:
         # initialize database
         ybdata.init(os.path.join(dirname, 'yobotdata_new.db'))
 
+        # enable gzip
+        if self.glo_setting["web_gzip"] > 0:
+            gzipped_types = {'text/html', 'text/javascript', 'text/css', 'application/json'}
+            @quart_app.after_request
+            async def gzip_response(response):
+                accept_encoding = request.headers.get('Accept-Encoding', '')
+                if (response.status_code < 200 or
+                    response.status_code >= 300 or
+                    len(await response.get_data()) < 1024 or
+                    'gzip' not in accept_encoding.lower() or
+                        'Content-Encoding' in response.headers):
+                    return response
+
+                gzip_buffer = BytesIO()
+                gzip_file = gzip.GzipFile(
+                    mode='wb', compresslevel=self.glo_setting["web_gzip"], fileobj=gzip_buffer)
+                gzip_file.write(await response.get_data())
+                gzip_file.close()
+                gzipped_response = gzip_buffer.getvalue()
+                response.set_data(gzipped_response)
+                response.headers['Content-Encoding'] = 'gzip'
+                response.headers['Content-Length'] = len(gzipped_response)
+
+                return response
+
         # initialize web path
         if not self.glo_setting.get("public_address"):
             try:
@@ -156,6 +183,35 @@ class Yobot:
         mimetypes.init()
         mimetypes.add_type('application/javascript', '.js')
         mimetypes.add_type('image/webp', '.webp')
+        
+        # add route for js dependencies
+        @quart_app.route("/yobot-depencency/<path:filename>")
+        async def yobot_js_dependencies(filename):
+            accept_encoding = request.headers.get('Accept-Encoding', '')
+            origin_file = os.path.join(os.path.dirname(
+                __file__), "public", "libs", filename)
+            if ('gzip' not in accept_encoding.lower()
+                    or self.glo_setting['web_gzip'] == 0):
+                return await send_file(origin_file)
+            gzipped_file = origin_file + ".gz"
+            if not os.path.exists(gzipped_file):
+                if not os.path.exists(origin_file):
+                    return "404 not found", 404
+                with open(origin_file, 'rb') as of, open(gzipped_file, 'wb') as gf:
+                    with gzip.GzipFile(
+                        mode='wb',
+                        compresslevel=self.glo_setting["web_gzip"],
+                        fileobj=gf,
+                    ) as gzip_file:
+                        gzip_file.write(of.read())
+            response = await make_response(await send_file(gzipped_file))
+            response.mimetype = (
+                mimetypes.guess_type(os.path.basename(origin_file))[0]
+                or "application/octet-stream"
+            )
+            response.headers['Content-Encoding'] = 'gzip'
+            response.headers['Vary'] = 'Accept-Encoding'
+            return response
 
         # add route for static files
         @quart_app.route(
