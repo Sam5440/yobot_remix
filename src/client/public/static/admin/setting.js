@@ -27,7 +27,7 @@ var vm = new Vue({
         update: function (event) {
             var flag = this.check_level_by_cycle()
             if (!flag) {
-                alert('阶段对应周目错误，请检查是不是填了相同的周目数或周目范围重叠');
+                alert('阶段对应周目错误。\n不同阶段的周目范围不能重叠，且下阶段开始周目必须等于上阶段结束周目加一');
                 return
             }
             this.setting.web_mode_hint = false;
@@ -97,7 +97,7 @@ var vm = new Vue({
             for (const area in this.setting.level_by_cycle) {
                 var last_level_max = 0
                 for (const level_info of this.setting.level_by_cycle[area]) {
-                    if (last_level_max >= level_info[0] || level_info[0] >= level_info[1])
+                    if (level_info[0] != last_level_max + 1 || level_info[0] > level_info[1])
                         return false
                     last_level_max = level_info[1]
                 }

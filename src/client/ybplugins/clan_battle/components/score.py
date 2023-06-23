@@ -16,7 +16,7 @@ def score_table(self, group_id):
 	'''
 	通过当期数据给成员打分
 	'''
-	group:Clan_group = Clan_group.get_or_none(group_id=group_id)
+	group:Clan_group = self.get_clan_group(group_id=group_id)
 	if group is None:raise GroupNotExist
 
 	members = Clan_member.select().where(

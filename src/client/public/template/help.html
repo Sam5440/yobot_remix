@@ -4,11 +4,11 @@
 </p> -->
 
 <head>
-    <title>yobot_remix使用手册</title>
+    <title>Yobot_remix使用手册</title>
     <!-- <link rel="shortcut icon" href="https://ftp.bmp.ovh/imgs/2020/07/a02e724300f43d03.png" type="image/x-icon"> -->
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta charset="UTF-8">
-    <meta name="description" Content="机器人功能指令说明">
+    <meta name="description" Content="手动报刀使用手册">
     <link rel="stylesheet" href="/yobot-depencency/github-markdown-css@3.0.1/github-markdown.css">
     <style>
         .markdown-body {
@@ -32,7 +32,7 @@
 </head>
 
 <body class="markdown-body">
-    <h1>Yobot_remix使用手册</h1>
+    <h1>这里是yobot_remix(手动报刀)使用手册</h1>
     <!-- <h3>https://github.com/eggggi/yobot_remix<br></h3> -->
     <!-- <p><b>快速查阅:</b><br>
         <a href="#1">如何报刀？</a><br><a href="#2">如何登陆管理界面？</a><br><a href="#3">如何进行各项查询？</a><br><a href="#4">如何抽卡？</a></p> -->
@@ -85,9 +85,9 @@
                 <td></td>
             </tr>
             <tr>
-                <td>申请出刀 [指定boss][是否为补偿]</td>
+                <td>申请出刀 [指定boss][是否为补偿]<br>进[指定boss][是否为补偿]</td>
                 <td>
-                    <b>如：<p style=color:red>申请出刀 1 </p>或：<p style=color:red>申请出刀 2b（b为指定补偿）</p></b>
+                    <b>如：<p style=color:red>申请出刀 1 </p>或：<p style=color:red>申请出刀 2b（b为指定补偿）</p>或： <p style=color:red>进1</p></b>
                     开始挑战boss，进入出刀状态<br>
                     必须指定boss，可以不指定补偿，当完整刀使用完后自动使用补偿<br>
                 </td>
@@ -101,9 +101,9 @@
                 <td>申请出刀后暂停报伤害，格式例如“报伤害 2s200w”，意思既为剩2秒打了200w伤害。可@某人为其报伤害</td>
             </tr>
             <tr>
-                <td>报刀 [指定boss] [具体伤害] [是否是补偿] [@某人] [昨日] [:留言]</td>
+                <td>报刀 [指定boss] [具体伤害] [是否是补偿] [@某人] [昨日] [:留言]<br>刀[指定boss] [具体伤害] [是否是补偿] [@某人] [昨日] [:留言]</td>
                 <td>
-                    <b>如：<p style=color:red>报刀 -1 100w</p> 或： <p style=color:red>报刀 100w@xxx（已申请出刀的情况下）</p>或： <p style=color:red>报刀 -1 100w b （b代表指定补偿）</p></b>
+                    <b>如：<p style=color:red>报刀 -1 100w</p> 或： <p style=color:red>报刀 100w@xxx（已申请出刀的情况下）</p>或： <p style=color:red>报刀 -1 100w b （b代表指定补偿）</p>或： <p style=color:red>刀1 100w</p></b>
                     对boss造成伤害但未击败时用，记录伤害，并退出出刀状态。可以使用 200w/200万/2000k 等（一般公会精确到万即可）<br>
                     若已申请出刀，可以不指定boss<br>
                     一般情况下不需要指定为补偿，会自动选择<br>
@@ -155,9 +155,17 @@
                 <td>查看所有已预约的玩家</td>
             </tr>
             <tr>
-                <td>挂树 [:留言]</td>
-                <td>挂树，当boss被击败时通知</td>
+                <td>挂树 [指定boss] [@某人] ：[留言]</td>
+                <td>挂树，当boss被击败时通知。可指定boss，可代人挂树。挂树后自动申请挂树boss出刀。需留言时使用中英文冒号均可，不可省略。</td>
             </tr>
+            <tr>
+                <td>查树</td>
+                <td>查看所有挂树信息</td>
+            </tr>        
+            <tr>
+                <td>查[BOSS号]</td>
+                <td>查看该BOSS的挂树信息</td>
+            </tr>      
             <tr>
                 <td>权限[@某人]</td>
                 <td>出现无权限的时候,管理员可以用这个指令申请权限,如果有at则为给予他人权限</td>

@@ -44,8 +44,9 @@
 				<el-menu-item index="1">面板</el-menu-item>
 			</el-menu>
 		</div>
-		<div class="clancycle" style="margin-top: 50px;">目前仅支持国服</div>
-		<iframe style="margin: 3%;width: 95%;" height="800" src="https://tools-wiki.biligame.com/pcr/battleRanking" ></iframe>
+		<!-- <div class="clancycle" style="margin-top: 50px;">目前仅支持国服</div> -->
+		<iframe style="margin-top:45px; width:100%;" :height="iframeHeight" frameborder="no" :src="clanRankUrl" ></iframe>
+
 	</div>
 </body>
 

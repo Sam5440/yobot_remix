@@ -5,19 +5,12 @@ from aiocqhttp.api import Api
 from .components.web_operation import register_routes
 from .components.kernel import init, execute, jobs, match
 from .components.score import score_table
+from .components.realize import *
 from .components.realize import (_level_by_cycle, _get_nickname_by_qqid,
 				_get_group_previous_challenge, _update_group_list_async, 
 				_fetch_member_list_async, _update_all_group_members_async,
-				_update_user_nickname_async, _boss_data_dict,
-
-				create_group, bind_group, drop_member, boss_status_summary, challenge,
-				undo, challenger_info, challenger_info_small, modify, change_game_server,
-				get_data_slot_record_count, clear_data_slot, switch_data_slot,
-				send_private_remind, send_remind, apply_for_challenge, behelf_remind,
-				put_on_the_tree, take_it_of_the_tree, check_blade, subscribe,subscribe_cancel,
-				cancel_blade, save_slot, get_in_boss_num, report_hurt, text_2_pic,
-
-				get_report, get_battle_member_list, get_member_list, get_subscribe_list)
+				_update_user_nickname_async, _boss_data_dict, _get_available_empty_battle_id,
+				_update_user_profile_image)
 
 
 class ClanBattle:
@@ -52,6 +45,8 @@ class ClanBattle:
 	_update_all_group_members_async = _update_all_group_members_async	##更新所有群成员
 	_update_user_nickname_async = _update_user_nickname_async			##更新成员名字
 	_boss_data_dict = _boss_data_dict									##获取boss当前数据
+	_get_available_empty_battle_id = _get_available_empty_battle_id		##获取公会最靠前的空白档案号
+	_update_user_profile_image = _update_user_profile_image             ##刷新用户头像
 
 	create_group = create_group								##创建公会
 	bind_group = bind_group									##加入公会
@@ -76,14 +71,17 @@ class ClanBattle:
 	challenger_info_small = challenger_info_small			##单个boss出刀信息
 	check_blade = check_blade								##检查是否已申请出刀
 	put_on_the_tree = put_on_the_tree						##挂树
+	check_tree = check_tree									##检查此用户在不在树上
 	take_it_of_the_tree = take_it_of_the_tree				##下树
 	get_in_boss_num = get_in_boss_num						##获取boss_num
 	subscribe = subscribe									##预约
 	subscribe_cancel = subscribe_cancel						##取消预约
 	get_subscribe_list = get_subscribe_list					##获取预约列表
+	challenge_record = challenge_record						##出刀记录
 
 	get_report = get_report										##获取报告
 	get_battle_member_list = get_battle_member_list				##从会战记录里获取成员列表
 	get_member_list = get_member_list							##获取所有成员列表
 	
-
+	query_tree = query_tree                                     ##查树
+	get_clan_group = get_clan_group

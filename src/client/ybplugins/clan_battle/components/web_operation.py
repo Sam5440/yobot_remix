@@ -9,6 +9,7 @@ from ...templating import render_template
 from ...ybdata import Clan_group, Clan_member, User
 from ..exception import ClanBattleError
 from ..util import pcr_datetime, atqq
+from .multi_cq_utils import who_am_i
 
 _logger = logging.getLogger(__name__)
 
@@ -20,7 +21,7 @@ def register_routes(self, app: Quart):
 		if 'yobot_user' not in session:
 			return redirect(url_for('yobot_login', callback=request.path))
 		user = User.get_by_id(session['yobot_user'])
-		group = Clan_group.get_or_none(group_id=group_id)
+		group = self.get_clan_group(group_id=group_id)
 		if group is None:
 			return await render_template('404.html', item='公会'), 404
 		is_member = Clan_member.get_or_none(
@@ -40,7 +41,7 @@ def register_routes(self, app: Quart):
 		if 'yobot_user' not in session:
 			return redirect(url_for('yobot_login', callback=request.path))
 		user = User.get_by_id(session['yobot_user'])
-		group = Clan_group.get_or_none(group_id=group_id)
+		group = self.get_clan_group(group_id=group_id)
 		if group is None:
 			return await render_template('404.html', item='公会'), 404
 		is_member = Clan_member.get_or_none(
@@ -56,7 +57,7 @@ def register_routes(self, app: Quart):
 				'clan/<int:group_id>/api/'),
 		methods=['POST'])
 	async def yobot_clan_api(group_id):
-		group = Clan_group.get_or_none(group_id=group_id)
+		group = self.get_clan_group(group_id=group_id)
 		if group is None:
 			return jsonify(
 				code=20,
@@ -196,6 +197,7 @@ def register_routes(self, app: Quart):
 				if group.notification & 0x01:
 					asyncio.ensure_future(
 						self.api.send_group_msg(
+							self_id = who_am_i(group_id),
 							group_id=group_id,
 							message=str(status),
 						)
@@ -219,6 +221,7 @@ def register_routes(self, app: Quart):
 				if group.notification & 0x02:
 					asyncio.ensure_future(
 						self.api.send_group_msg(
+							self_id = who_am_i(group_id),
 							group_id=group_id,
 							message=str(status),
 						)
@@ -244,6 +247,7 @@ def register_routes(self, app: Quart):
 				if group.notification & 0x04:
 					asyncio.ensure_future(
 						self.api.send_group_msg(
+							self_id = who_am_i(group_id),
 							group_id = group_id,
 							message = atqq(behalf)+status,
 						)
@@ -263,6 +267,7 @@ def register_routes(self, app: Quart):
 				if group.notification & 0x08:
 					asyncio.ensure_future(
 						self.api.send_group_msg(
+							self_id = who_am_i(group_id),
 							group_id = group_id,
 							message = atqq(behalf)+status,
 						)
@@ -282,6 +287,7 @@ def register_routes(self, app: Quart):
 				if group.notification & 0x08:
 					asyncio.ensure_future(
 						self.api.send_group_msg(
+							self_id = who_am_i(group_id),
 							group_id = group_id,
 							message = atqq(behalf)+status,
 						)
@@ -301,6 +307,7 @@ def register_routes(self, app: Quart):
 				if group.notification & 0x08:
 					asyncio.ensure_future(
 						self.api.send_group_msg(
+							self_id = who_am_i(group_id),
 							group_id = group_id,
 							message = atqq(behalf)+status,
 						)
@@ -325,6 +332,7 @@ def register_routes(self, app: Quart):
 				if group.notification & 0x200:
 					asyncio.ensure_future(
 						self.api.send_group_msg(
+							self_id = who_am_i(group_id),
 							group_id=group_id,
 							message=(self._get_nickname_by_qqid(sl_member_qqid) + f'已{sw}SL记录'),
 						)
@@ -339,7 +347,7 @@ def register_routes(self, app: Quart):
 			elif action == 'add_subscribe':
 				boss_num = payload['boss_num']
 				message = payload.get('message')
-				try:self.subscribe(group_id, user_id, str(boss_num))
+				try:self.subscribe(group_id, user_id, str(boss_num), message)
 				except ClanBattleError as e:
 					_logger.info('网页 失败 {} {} {}'.format(user_id, group_id, action))
 					return jsonify(code = 10, message = str(e))
@@ -353,6 +361,7 @@ def register_routes(self, app: Quart):
 					if message: notice_message += '\n留言：' + message
 					asyncio.ensure_future(
 						self.api.send_group_msg(
+							self_id = who_am_i(group_id),
 							group_id = group_id,
 							message = notice_message,
 						)
@@ -369,6 +378,7 @@ def register_routes(self, app: Quart):
 				if group.notification & 0x80:
 					asyncio.ensure_future(
 						self.api.send_group_msg(
+							self_id = who_am_i(group_id),
 							group_id = group_id,
 							message = '{}已取消预约{}号boss'.format(user.nickname, boss_num),
 						)
@@ -392,6 +402,7 @@ def register_routes(self, app: Quart):
 				if group.notification & 0x100:
 					asyncio.ensure_future(
 						self.api.send_group_msg(
+							self_id = who_am_i(group_id),
 							group_id=group_id,
 							message=str(status),
 						)
@@ -458,7 +469,7 @@ def register_routes(self, app: Quart):
 		if 'yobot_user' not in session:
 			return redirect(url_for('yobot_login', callback=request.path))
 		user = User.get_by_id(session['yobot_user'])
-		group = Clan_group.get_or_none(group_id=group_id)
+		group = self.get_clan_group(group_id=group_id)
 		if group is None:
 			return await render_template('404.html', item='公会'), 404
 		is_member = Clan_member.get_or_none(
@@ -478,7 +489,7 @@ def register_routes(self, app: Quart):
 		if 'yobot_user' not in session:
 			return redirect(url_for('yobot_login', callback=request.path))
 		user = User.get_by_id(session['yobot_user'])
-		group = Clan_group.get_or_none(group_id=group_id)
+		group = self.get_clan_group(group_id=group_id)
 		if group is None:
 			return await render_template('404.html', item='公会'), 404
 		is_member = Clan_member.get_or_none(
@@ -507,7 +518,7 @@ def register_routes(self, app: Quart):
 			)
 		user_id = session['yobot_user']
 		user = User.get_by_id(user_id)
-		group = Clan_group.get_or_none(group_id=group_id)
+		group = self.get_clan_group(group_id=group_id)
 		if group is None:
 			return jsonify(
 				code=20,
@@ -586,7 +597,7 @@ def register_routes(self, app: Quart):
 		if 'yobot_user' not in session:
 			return redirect(url_for('yobot_login', callback=request.path))
 		user = User.get_by_id(session['yobot_user'])
-		group = Clan_group.get_or_none(group_id=group_id)
+		group = self.get_clan_group(group_id=group_id)
 		if group is None:
 			return await render_template('404.html', item='公会'), 404
 		is_member = Clan_member.get_or_none(
@@ -607,7 +618,7 @@ def register_routes(self, app: Quart):
 		if 'yobot_user' not in session:
 			return redirect(url_for('yobot_login', callback=request.path))
 		user = User.get_by_id(session['yobot_user'])
-		group = Clan_group.get_or_none(group_id=group_id)
+		group = self.get_clan_group(group_id=group_id)
 		if group is None:
 			return await render_template('404.html', item='公会'), 404
 		is_member = Clan_member.get_or_none(
@@ -623,7 +634,7 @@ def register_routes(self, app: Quart):
 				'clan/<int:group_id>/statistics/api/'),
 		methods=['GET'])
 	async def yobot_clan_statistics_api(group_id):
-		group = Clan_group.get_or_none(group_id=group_id)
+		group = self.get_clan_group(group_id=group_id)
 		if group is None:
 			return jsonify(code=20, message='Group not exists')
 		apikey = request.args.get('apikey')
@@ -679,7 +690,7 @@ def register_routes(self, app: Quart):
 				'clan/<int:group_id>/progress/'),
 		methods=['GET'])
 	async def yobot_clan_progress(group_id):
-		group = Clan_group.get_or_none(group_id=group_id)
+		group = self.get_clan_group(group_id=group_id)
 		if group is None:
 			return await render_template('404.html', item='公会'), 404
 		if not(group.privacy & 0x1):
@@ -699,7 +710,7 @@ def register_routes(self, app: Quart):
 				'clan/<int:group_id>/clan-rank/'),
 		methods=['GET'])
 	async def yobot_clan_rank(group_id):
-		group = Clan_group.get_or_none(group_id=group_id)
+		group = self.get_clan_group(group_id=group_id)
 		if group is None:
 			return await render_template('404.html', item='公会'), 404
 		if not(group.privacy & 0x1):

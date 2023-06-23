@@ -15,6 +15,7 @@ var vm = new Vue({
         activeIndex: '5',
         qqid: 0,
         nickname: '',
+        tempList:[0,1,2,3,4,5],
     },
     mounted() {
         var thisvue = this;
@@ -42,6 +43,14 @@ var vm = new Vue({
                 return '';
             }
             return `(${cha.cycle}-${cha.boss_num}) <a class="digit${cha.damage.toString().length}">${cha.damage}</a>`;
+        },
+        behalf: function (cha) {
+            if (cha == undefined) {
+                return '';
+            }
+            if (cha.behalf) {
+                return `<a class="digit${cha.behalf.toString().length}">${this.find_name(cha.behalf)} 代刀</a>`;
+            }
         },
         cdetail: function (cha) {
             if (cha == undefined) {
@@ -87,7 +96,19 @@ var vm = new Vue({
                         detail: [],
                     }
                 }
-                m.detail[2 * m.finished] = c;
+
+                for (id of this.tempList){
+                    if (!m.detail[id]) {
+                        if (id%2 == 1 && c.is_continue && m.detail[id-1] && m.detail[id-1].health_remain == 0) {
+                            m.detail[id] = c;
+                            break;
+                        } else if (id%2 == 0) {
+                            m.detail[id] = c;
+                            break;
+                        }
+                    }
+                }
+
                 if (c.is_continue) {
                     m.finished += 0.5;
                 } else {

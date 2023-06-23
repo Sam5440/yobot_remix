@@ -1,10 +1,8 @@
 **/__pycache__
-src/client/yobot_data/yobotdata_new.db-shm
-src/client/yobot_data/yobotdata_new.db-wal
-src/client/yobot_data/log/公会战日志.log
-src/client/yobot_data/yobotdata_new.db
-.vscode/settings.json
-src/client/yobot_data/yobot_config.json
+.vscode/
+src/client/yobot_data/*
 src/client/public/template/help/
 src/client/public/static/aya.ico
-src/client/yobot_data/
+src/client/venv
+src/client/dist
+src/client/build

@@ -28,8 +28,7 @@ a = Analysis(
     datas=[
         ("packedfiles", "packedfiles"),
         ("public", "public"),
-        (f"{sitepackages_location('opencc')}/opencc/config", "opencc/config"),
-        (f"{sitepackages_location('opencc')}/opencc/dictionary", "opencc/dictionary"),
+        ('ybplugins/clan_battle/components/fonts/', 'fonts'),
     ],
     hiddenimports=[],
     hookspath=[],

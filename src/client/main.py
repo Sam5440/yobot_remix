@@ -5,6 +5,7 @@
 import platform
 import os
 import sys
+import random
 
 if platform.system() == "Linux":
     if "-g" not in sys.argv[1:]:
@@ -39,6 +40,20 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 import yobot
 
 
+def insert_seq(seq, x):
+    for i in seq:
+        if '\u4e00' <= i <= '\u9fa5':
+            if random.random() < 0.2:
+                yield x
+        yield i
+
+
+def insert_zwsp(x: str) -> str:
+    zwsp = '\ufeff'
+    m = insert_seq(x, zwsp)
+    return ''.join(m)
+
+
 def main():
     print("""==============================
               _           _
@@ -48,7 +63,7 @@ def main():
  | |_| | (_) | |_) | (_) | |_
   \__, |\___/|_.__/ \___/ \__|
    __/ |
-  |___/
+  |___/            --Remix
 ==============================""")
     print("正在初始化...")
 
@@ -95,7 +110,7 @@ def main():
         else:
             reply = None
         if isinstance(reply, str) and reply != "":
-            return {'reply': reply,
+            return {'reply': insert_zwsp(reply),
                     'at_sender': False}
         else:
             return None
